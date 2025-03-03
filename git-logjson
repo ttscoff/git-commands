@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# Output git log in JSON format
+#
+# $ git logjson
+#
+require 'json'
+
+log = `git log --pretty=format:'---%s%+ci%+h%+b___'`.strip
+entries = log.scan(/(?mi)(?<=^---)([\s\S]*?)(?=___)/)
+json = {'commits' => []}
+entries.each do |entry|
+  lines = entry[0].split(/\n/)
+  title = lines[0]
+  date = lines[1]
+  commit_hash = lines[2]
+  note = ''
+  if lines.length > 3
+    note = lines[3..-1].join("\n").strip
+  end
+  json['commits'] << {
+    'title' => title,
+    'date' => date,
+    'hash' => commit_hash,
+    'note' => note
+  }
+end
+
+print JSON.pretty_generate(json)

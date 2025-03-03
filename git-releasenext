@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+# Uses hub to create a release with next semantic version
+#
+# $ git releasenext [major|minor|*build]
+#
+
+# main class
+class ReleaseNext
+  # initialize
+  # @type can be :major, :minor, or :build
+  # @raise 'Working directory dirty' if working directory is dirty
+  # @raise 'Out of sync with origin' unless synced
+  # @raise 'Not semantic versioning' unless current version is semantic
+  # @param type [String] type of version to increment
+  # @return [ReleaseNext] new ReleaseNext object
+  def initialize(type = nil)
+    type ||= 'build'
+    @type = case type
+            when /^maj/
+              :major
+            when /^min/
+              :minor
+            else
+              :build
+            end
+    @branch = branch
+
+    raise 'Working directory dirty' if dirty?
+
+    raise 'Out of sync with origin' unless synced?
+  end
+
+  # check if working directory is dirty
+  # @return true if working directory is dirty
+  def dirty?
+    stat = `git diff --shortstat 2> /dev/null | tail -n1`.strip
+    return stat !~ /^\s*$/
+  end
+
+  # get current branch
+  # @return current branch name
+  def branch
+    `git remote show origin | sed -n '/HEAD branch/s/.*: //p'`.strip
+  end
+
+  # check if local branch is in sync with origin
+  # @return true if local branch is in sync with origin
+  def synced?
+    status = `git rev-list --left-right --count origin/#{@branch}...#{@branch}`.strip.gsub(/[\s\t]/, '')
+    return status =~ /00/
+  end
+
+  # get current version number
+  # @return current semantic version number
+  def version
+    current = `git tag| sed 's/[^0-9\.]//' | awk -F. '{printf("%04d.%04d.%04d\\n",$1,$2,$3);}'|sort|tail -1|awk -F. '{printf ("%d.%d.%d",$1 + 0, $2 + 0, $3 + 0);}'`.strip
+
+    raise 'Not semantic versioning' unless current =~ /^\d+\.\d+\.\d+$/
+    current
+  end
+
+  # increment version number
+  # @type can be :major, :minor, or :build
+  # @return new semantic version number
+  def next_version
+    maj, min, build = version.split(/\./)
+
+    case @type
+    when :major
+      maj.next!
+      min = 0
+      build = 0
+    when :minor
+      min.next!
+      build = 0
+    else
+      build.next!
+    end
+
+    "#{maj}.#{min}.#{build}"
+  end
+
+  # create a release with the next version number
+  def release
+    n = next_version
+    puts `hub release create -m "v#{n}" #{n}`
+    puts `git pull`
+    puts "Release v#{n} created successfully." # Added feedback on success
+  end
+end
+
+if ARGV.length > 1
+  puts "Usage: git releasenext [major|minor|*build]"
+  Process.exit 1
+end
+
+rn = ReleaseNext.new(ARGV[0])
+rn.release

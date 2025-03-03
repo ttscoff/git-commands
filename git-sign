@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+# Set up GPG signing
+#
+# $ git sign [false|key]
+#
+# Add keys with
+#   key: [GPG id, "description"]
+available = {}
+default_key = nil
+
+`git config --global --get-regex "sign\.*\."`.strip.split("\n").each do |k|
+  type = k.match(/sign\.(?<type>[^\.]+)\..*/)&.captures
+  next unless type
+
+  available[type[0]] ||= {}
+
+  key = k.match(/sign\.#{type[0]}\.key\s(?<key>.*)/)&.captures
+  available[type[0]][:key] = key[0] if key
+
+  id = k.match(/sign\.#{type[0]}\.id\s(?<id>.*)/)&.captures
+  available[type[0]][:id] = id[0] if id
+
+  default = k.match(/sign\.#{type[0]}\.default\s(.*)/)&.captures
+  default_key = type if default && default[1] =~ /^[ty]/i
+end
+
+if available.empty?
+  puts 'No GPG signing keys found'
+  puts 'Please define keys in ~/.gitconfig'
+  puts
+  puts 'Example:'
+  puts
+  puts '[sign "GitHub"]'
+  puts '  key = g'
+  puts '  id = 1234567890ABCDEF'
+  puts '  default = true'
+  Process.exit 1
+end
+
+default_key ||= available.keys.first
+
+if ARGV[0] =~ /^-*(h(elp)?|(ls|list)?)$/
+  puts "Set up GPG signing"
+  puts "Disable signing: git sign false"
+  available.each do |k, v|
+    puts "Sign with #{k}: git sign #{v[:key]}"
+  end
+  puts "Use '--global' as first argument to make change global"
+  Process.exit 0
+end
+
+global = ''
+if ARGV[0] =~ /^-+g/
+  global = ' --global'
+  ARGV.shift
+end
+
+if ARGV[0] =~ /^(fa|no)/
+  `git config#{global} commit.gpgSign false`
+  `git config#{global} tag.gpgSign false`
+  puts "Disabled GPG signing"
+else
+  key = ARGV[0] ? ARGV[0].downcase : default_key.downcase
+  type = nil
+  id = nil
+  available.each do |k, v|
+    next unless v[:key].downcase == key || k.downcase == key
+
+    type = k
+    id = v[:id]
+  end
+  raise "No key found for #{ARGV[0]}" unless id
+
+  `git config#{global} user.signingkey #{id}`
+
+  `git config#{global} commit.gpgSign true`
+  `git config#{global} tag.gpgSign true`
+  puts "Enabled GPG signing and set signing key to #{type} ID (#{id})"
+end

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Add all new files and remove all deleted files
+#
+# $ git ar
+
+update_git_index() {
+    git ls-files -d -m -o -z --exclude-standard | xargs -0 git update-index --add --remove
+}
+
+update_git_index

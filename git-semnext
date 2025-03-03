@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+# Get next semantic version
+#
+# $ git next [major|minor|*build]
+#
+type = ARGV[0]
+RX = /^v?(?<major>\d+)\.(?<minor>\d+)\.(?<inc>\d+)(?<pre>\S+)?/i
+
+current = `git ver`
+
+raise 'Not semantic versioning' unless current =~ RX
+
+m = current.match(RX)
+major = m['major'].to_i
+minor = m['minor'].to_i
+inc = m['inc'].to_i
+pre = m['pre']
+
+case type
+when /^maj/
+  major += 1
+  minor = 0
+  inc = 0
+when /^min/
+  minor += 1
+  inc = 0
+when /^(pat|inc)/
+  pre = ''
+  inc += 1
+else
+  if type =~ /^pre/
+    if pre.nil? || pre.empty?
+      inc += 1
+      pre = 'pre'
+    else
+      pre.next!
+    end
+  elsif pre && !pre.empty?
+    pre.next!
+  else
+    inc += 1
+  end
+end
+
+$stdout.print "#{major}.#{minor}.#{inc}#{pre}"

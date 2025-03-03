@@ -1,0 +1,53 @@
+#!/bin/bash
+# Curls ignore files for various languages from gitignore.io
+# Appends to (or creates) .gitignore in top level directory
+#
+# $ git ig [<lang>]
+#
+
+__fzf() {
+    local query list
+    list=$1
+    shift
+    if test $# == 0; then
+        echo -e "$list" | fzf
+    else
+        echo -e "$list" | fzf -q $@
+    fi
+}
+
+__ig() {
+    # Retrieve a list of all available ignore files
+    local list hasmatch result
+    
+    list=$(curl -L https://www.gitignore.io/api/list \
+    2> /dev/null | tr ',' "\n")
+    
+    # 1 Argument required: name of language
+    if test $# == 0; then
+        result=$(__fzf "$list")
+    else
+        # See if there's an exact match in the list of ignore files
+        hasmatch=$(echo -e "$list" | grep -ce "^$@$")
+        if test $hasmatch == 0; then
+            echo "Language not found: $@"
+            result=$(__fzf "$list" $@)
+        else
+            result=$@
+        fi
+    fi
+    
+    if [[ -z "$result" ]]; then
+        echo "Missing target language"
+        echo "Usage: git ig LANG"
+        exit 0
+    fi
+    
+    # cd to the top level of the current repository
+    cd $(git rev-parse --show-toplevel)
+    # Append API output to .gitignore
+    curl -sSL http://www.gitignore.io/api/$result >> .gitignore
+    echo "Appended ignore for $@ to $(pwd)/.gitignore"
+}
+
+__ig $@

@@ -1,0 +1,19 @@
+#!/bin/bash
+# Retrieves a list of available ignore files from gitignore.io
+# If an argument is passed, use it as a search term to
+# narrow the list
+#
+# $ git iglist [<search>]
+#
+__iglist() {
+    local list=$(curl -L https://www.gitignore.io/api/list \
+    2> /dev/null | tr ',' "\n")
+    
+    if [[ $# > 0 ]]; then
+        list=$(echo -e "$list"|grep -i $@)
+    fi
+    
+    echo -e "$list"
+}
+
+__iglist $@

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Create a commit message using gum
+# Prompt for summary first, then list modified files and request details
+#
+# $ git comm [<summary>]
+#
+STATUS=$(git status --porcelain --untracked-files=no)
+
+if [[ -z "$STATUS" ]]; then
+    echo "No changes to commit"
+else
+    echo "Modified files:"
+    echo -e "$STATUS"
+    
+    SUMMARY=$*
+    if [[ -z $SUMMARY ]]; then
+        SUMMARY=$(gum input --placeholder "Summary of this change" --width 50 --placeholder.foreground="240")
+    fi
+    
+    if [[ -n "$SUMMARY" ]]; then
+        DETAILS=$(gum write --placeholder "Details of this change" --width $(tput cols) --height 10 --show-cursor-line --show-line-numbers --char-limit 2000)
+        git commit -a -m "$SUMMARY" -m "$DETAILS"
+    else
+        echo "Empty commit message, canceling"
+    fi
+fi

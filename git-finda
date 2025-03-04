@@ -1,6 +1,65 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
 # Search for a git alias
 # $ git finda <alias>
+#
+# Match with wildcard pattern
+# $ git finda '<pattern>*'
 
-git config --global --get-regexp alias | grep -i "$1" | awk -v nr=2 '{sub(/^alias\./,"")};{printf "\033[31m%10s\033[1;37m", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf "%s%s", sep, $x; }; print "\033[0;39m"}'
+aliases = {}
+`git config --get-regexp alias`.split("\n").each do |line|
+  name, value = line.split(" ", 2)
+  aliases[name.sub(/^alias\./, "")] = value
+end
+
+class ::String
+  def wildcard_to_rx
+    /#{gsub(/\*/, ".*").gsub(/\?/, ".")}/
+  end
+
+  def trunc(max)
+    str = gsub(/ +/, " ")
+    length = str.length
+    if length > max
+      "#{str[0..max-4]}..."
+    else
+      str
+    end
+  end
+end
+
+COLS = `tput cols`.to_i
+
+COLORS = {
+  "red" => "\033[31m",
+  "green" => "\033[32m",
+  "yellow" => "\033[33m",
+  "blue" => "\033[34m",
+  "magenta" => "\033[35m",
+  "cyan" => "\033[36m",
+  "white" => "\033[37m",
+  "boldwhite" => "\033[1;37m",
+  "reset" => "\033[0;39m"
+}
+
+pattern = ARGV[0] ? ARGV[0].wildcard_to_rx : /.*/
+
+aliases.filter! { |name, _| name.match(pattern) }
+
+longest_alias = aliases.keys.map(&:length).max
+
+if aliases.empty?
+  puts "#{COLORS["red"]}No matching aliases found#{COLORS["reset"]}"
+  exit
+end
+
+aliases.sort_by { |name, _| name }.each do |name, value|
+  if name.match(pattern)
+    color = COLORS["green"]
+  else
+    color = COLORS["red"]
+  end
+
+  formatted_alias = "#{color}#{name.ljust(longest_alias)}#{COLORS["boldwhite"]} #{value.trunc(COLS - longest_alias - 2)}#{COLORS["reset"]}"
+  puts formatted_alias
+end

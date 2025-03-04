@@ -32,7 +32,7 @@ if available.empty?
   puts
   puts '[sign "GitHub"]'
   puts '  key = g'
-  puts '  id = 1234567890ABCDEF'
+  puts '  id = XXXXXXXXXXXX'
   puts '  default = true'
   Process.exit 1
 end

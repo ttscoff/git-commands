@@ -38,3 +38,9 @@ All easily installed with Homebrew.
 [gum]: https://github.com/charmbracelet/gum
 [fzf]: https://github.com/junegunn/fzf
 [hub]: https://github.com/mislav/hub
+
+## Aliases
+
+See the comments at the top of `useful-git-aliases.conf` for installation and usage.
+
+Once installed, `git la` will list all your aliases.

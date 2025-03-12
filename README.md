@@ -41,6 +41,32 @@ All easily installed with Homebrew.
 
 ## Aliases
 
-See the comments at the top of `useful-git-aliases.conf` for installation and usage.
+`useful-git-aliases.conf` contains a collection of useful aliases.
+
+### Usage
+
+Save `useful-git-aliases.conf` somewhere on your system. I
+like to put it in a folder I sync with Dropbox between my
+machines:
+
+     ~/.local/share/git/useful-git-aliases.conf
+
+Edit ~/.gitconfig to include this file:
+
+     vim ~/.gitconfig
+
+Include the path to the alias file:
+
+    [include]
+    path = ~/.local/share/git/useful-git-aliases.conf
+
+The file includes some aliases from [@durdn](https://www.durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/).
+
 
 Once installed, `git la` will list all your aliases.
+
+## License
+
+This repo is licensed under the MIT License.
+
+See <https://opensource.org/licenses/MIT> for details.

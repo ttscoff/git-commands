@@ -5,11 +5,12 @@ scripts than as aliases.
 
 ## Installation
 
-Copy or link these files into your PATH and call them like
-`git ar` or `git finda ci`. Make sure the scripts are
-executable.
+Clone this repo and copy or link the directory into your
+$PATH and call them like `git ar` or `git finda ci`. Make
+sure the scripts are executable.
 
-More complex commands will display usage instruction with `-h`.
+More complex commands will display usage instruction
+with `-h`.
 
 ## Dependencies
 

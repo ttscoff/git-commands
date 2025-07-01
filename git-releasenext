@@ -1,27 +1,27 @@
 #!/usr/bin/env ruby
 # Uses hub to create a release with next semantic version
 #
-# $ git releasenext [major|minor|*build]
+# $ git releasenext [major|minor|*patch]
 #
 
 # main class
 class ReleaseNext
   # initialize
-  # @type can be :major, :minor, or :build
+  # @type can be :major, :minor, or :patch
   # @raise 'Working directory dirty' if working directory is dirty
   # @raise 'Out of sync with origin' unless synced
   # @raise 'Not semantic versioning' unless current version is semantic
   # @param type [String] type of version to increment
   # @return [ReleaseNext] new ReleaseNext object
   def initialize(type = nil)
-    type ||= 'build'
+    type ||= 'patch'
     @type = case type
             when /^maj/
               :major
             when /^min/
               :minor
             else
-              :build
+              :patch
             end
     @branch = branch
 
@@ -60,24 +60,24 @@ class ReleaseNext
   end
 
   # increment version number
-  # @type can be :major, :minor, or :build
+  # @type can be :major, :minor, or :patch
   # @return new semantic version number
   def next_version
-    maj, min, build = version.split(/\./)
+    maj, min, patch = version.split(/\./)
 
     case @type
     when :major
       maj.next!
       min = 0
-      build = 0
+      patch = 0
     when :minor
       min.next!
-      build = 0
+      patch = 0
     else
-      build.next!
+      patch.next!
     end
 
-    "#{maj}.#{min}.#{build}"
+    "#{maj}.#{min}.#{patch}"
   end
 
   # create a release with the next version number
@@ -89,8 +89,8 @@ class ReleaseNext
   end
 end
 
-if ARGV.length > 1
-  puts "Usage: git releasenext [major|minor|*build]"
+if ARGV.length > 1 || ARGV[0] =~ /^-*h/
+  puts "Usage: git releasenext [major|minor|*patch]"
   Process.exit 1
 end
 

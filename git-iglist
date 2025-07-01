@@ -7,13 +7,20 @@
 #
 __iglist() {
     local list=$(curl -L https://www.gitignore.io/api/list \
-    2> /dev/null | tr ',' "\n")
-    
+        2>/dev/null | tr ',' "\n")
+
     if [[ $# > 0 ]]; then
-        list=$(echo -e "$list"|grep -i $@)
+        list=$(echo -e "$list" | grep -i $@)
     fi
-    
+
     echo -e "$list"
 }
+
+if [[ $1 =~ ^-+h(elp)?$ ]]; then
+    echo "Usage: git iglist [<search>]"
+    echo "Retrieves a list of available ignore files from gitignore.io"
+    echo "If an argument is passed, use it as a search term to narrow the list."
+    exit 0
+fi
 
 __iglist $@

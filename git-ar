@@ -8,4 +8,10 @@ update_git_index() {
     git ls-files -d -m -o -z --exclude-standard | xargs -0 git update-index --add --remove
 }
 
-update_git_index
+if [[ $# -eq 0 ]]; then
+    # No arguments, run the update
+    update_git_index
+else
+    echo "Usage: git ar"
+    echo "This command updates the git index by adding new files and removing deleted files."
+fi

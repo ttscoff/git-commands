@@ -25,4 +25,10 @@ entries.each do |entry|
   }
 end
 
+if ARGV[0] && ARGV[0] =~ /^-+h(elp)?$/
+  puts "Usage: git logjson"
+  puts "Output git log in JSON format."
+  exit
+end
+
 print JSON.pretty_generate(json)

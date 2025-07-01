@@ -176,5 +176,12 @@ class WhyIgnore
   end
 end
 
+if ARGV[0] && ARGV[0] =~ /^-+h(elp)?$/
+  puts "Usage: git whyig"
+  puts "Show why files are ignored by git."
+  puts "This command lists the reasons for ignoring files in the current repository."
+  exit
+end
+
 wi = WhyIgnore.new
 wi.print_reasons

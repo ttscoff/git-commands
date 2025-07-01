@@ -4,4 +4,10 @@
 # $ git ver
 # 1.2.3
 #
+if [[ $1 =~ ^-+h(elp)?$ ]]; then
+    echo "Usage: git ver"
+    echo "Show current git version based on tags."
+    exit 0
+fi
+
 git tag | sed 's/[^0-9\.]//' | awk -F. '{printf("%04d.%04d.%04d\n",$1,$2,$3);}' | sort | tail -1 | awk -F. '{printf ("%d.%d.%d",$1 + 0, $2 + 0, $3 + 0);}'

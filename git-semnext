@@ -1,9 +1,19 @@
 #!/usr/bin/env ruby
 # Get next semantic version
 #
-# $ git next [major|minor|*build]
+# $ git next [major|minor|*patch|pre]
 #
+if ARGV[0] && ARGV[0] =~ /^-+h(elp)?$/
+  puts "Usage: git next [major|minor|*patch|pre]"
+  puts "Get the next semantic version number."
+  puts "If no argument is given, it will increment the patch version."
+  puts "Use 'major' to increment the major version, 'minor' for minor, and 'patch' or 'inc' for patch."
+  puts "Use 'pre' to increment pre-release versions."
+  exit
+end
+
 type = ARGV[0]
+
 RX = /^v?(?<major>\d+)\.(?<minor>\d+)\.(?<inc>\d+)(?<pre>\S+)?/i
 
 current = `git ver`
@@ -24,7 +34,7 @@ when /^maj/
 when /^min/
   minor += 1
   inc = 0
-when /^(pat|inc)/
+when /^(pat|inc|build)/
   pre = ''
   inc += 1
 else

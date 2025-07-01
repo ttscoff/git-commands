@@ -18,7 +18,7 @@ Some scripts require external tools:
 
 - [gum]
 - [fzf]
-- [hub]
+- [hub] or [gh]
 
 All easily installed with Homebrew.
 
@@ -26,11 +26,11 @@ All easily installed with Homebrew.
 
 - `git ar` - Add all new files to staging and remove deleted files
 - `git comm [<summary>]` - Pretty commit message input using [gum]
-- `git finda <alias>` - Find a git alias using pattern matching
+- `git finda [<alias>]` - Find a git alias using pattern matching
 - `git ig [<lang>]` - Add contents of an ignore file from gitignore.io, uses [fzf]
 - `git iglist` - List all available ignore files
 - `git logjson` - Output a JSON-formatted git log
-- `git releasenext [major|minor|*patch]` - Creates a release using [hub] for the next semantic version (based on tags)
+- `git releasenext [major|minor|*patch]` - Creates a release using [hub] or [gh] for the next semantic version (based on tags)
 - `git semnext [major|minor|*patch]` - Output the next semantic version number
 - `git sign` - Enable/disable GPG signing, assign key for repo or globally
 - `git ver` - Display the current semantic version (based on tags)
@@ -39,6 +39,7 @@ All easily installed with Homebrew.
 [gum]: https://github.com/charmbracelet/gum
 [fzf]: https://github.com/junegunn/fzf
 [hub]: https://github.com/mislav/hub
+[gh]: https://cli.github.com/
 
 ## Aliases
 

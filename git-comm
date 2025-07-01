@@ -10,14 +10,21 @@ STATUS=$(git status --porcelain --untracked-files=no)
 if [[ -z "$STATUS" ]]; then
     echo "No changes to commit"
 else
+    if [[ $1 =~ ^-+h(elp)?$ ]]; then
+        echo "Usage: git comm [<summary>]"
+        echo "This command creates a commit with a summary and details."
+        echo "If no summary is provided, it will prompt for one."
+        exit 0
+    fi
+
     echo "Modified files:"
     echo -e "$STATUS"
-    
+
     SUMMARY=$*
     if [[ -z $SUMMARY ]]; then
         SUMMARY=$(gum input --placeholder "Summary of this change" --width 50 --placeholder.foreground="240")
     fi
-    
+
     if [[ -n "$SUMMARY" ]]; then
         DETAILS=$(gum write --placeholder "Details of this change" --width $(tput cols) --height 10 --show-cursor-line --show-line-numbers --char-limit 2000)
         git commit -a -m "$SUMMARY" -m "$DETAILS"

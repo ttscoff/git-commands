@@ -13,7 +13,7 @@ class ReleaseNext
   # @raise 'Not semantic versioning' unless current version is semantic
   # @param type [String] type of version to increment
   # @return [ReleaseNext] new ReleaseNext object
-  def initialize(type = nil)
+  def initialize(type = nil, tool = 'hub')
     type ||= 'patch'
     @type = case type
             when /^maj/
@@ -24,6 +24,15 @@ class ReleaseNext
               :patch
             end
     @branch = branch
+
+    @tool = case tool
+            when /^h/i
+              :hub
+            when /^g/i
+              :gh
+            else
+              raise "Unknown tool: #{tool}. Use "hub" or "gh"."
+            end
 
     raise 'Working directory dirty' if dirty?
 
@@ -83,16 +92,33 @@ class ReleaseNext
   # create a release with the next version number
   def release
     n = next_version
-    puts `hub release create -m "v#{n}" #{n}`
+    if @tool == :gh
+      puts `gh release create v#{n} --title "v#{n}" --notes "Release v#{n}"`
+    else
+      puts `hub release create -m "v#{n}" v#{n}`
+    end
     puts `git pull`
     puts "Release v#{n} created successfully." # Added feedback on success
   end
 end
 
-if ARGV.length > 1 || ARGV[0] =~ /^-*h/
+if ARGV.length > 1 || ARGV[0] =~ /^-+(-h|help)$/
+  puts "Create a release with the next semantic version using hub."
   puts "Usage: git releasenext [major|minor|*patch]"
   Process.exit 1
 end
 
-rn = ReleaseNext.new(ARGV[0])
+tool = 'hub'
+
+## Test for hub and gh. If both exist, use hub. If hub doesn't exist and gh does, use gh. Otherwise raise an error.
+if system('which hub > /dev/null 2>&1')
+  tool = 'hub'
+elsif system('which gh > /dev/null 2>&1')
+  tool = 'gh'
+else
+  raise "Neither 'hub' nor 'gh' command found. Please install one of them."
+end
+
+# Create a new ReleaseNext object and call release
+rn = ReleaseNext.new(ARGV[0], tool)
 rn.release

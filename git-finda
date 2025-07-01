@@ -42,6 +42,14 @@ COLORS = {
   "reset" => "\033[0;39m"
 }
 
+if ARGV[0] && ARGV[0].match(/^-+h(elp)?$/)
+  puts "Usage: git finda [<pattern>]"
+  puts "Search for git aliases matching the given pattern."
+  puts "Use '*' and '?' as wildcard characters."
+  puts "^ for start, $ for end, and . for any character."
+  exit
+end
+
 pattern = ARGV[0] ? ARGV[0].wildcard_to_rx : /.*/
 
 aliases.filter! { |name, _| name.match(pattern) }
